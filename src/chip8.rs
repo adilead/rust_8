@@ -33,7 +33,7 @@ pub struct Chip8 {
     sp: u8,
     //Stack pointer
     delay: u8,
-    //delay timer; TODO Find a clockspeed
+    //delay timer;
     sound: u8,
     //sound timer; when the it's 0, a buzz shall be emitted
     gfx: [u8; (VIDEO_HEIGHT * VIDEO_WIDTH) as usize],
@@ -46,7 +46,7 @@ impl Chip8 {
         self.pc = START_ADDR;
         //Storing fonts in the memory
         let fonts: [u8; 80] = [
-            0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+            0xF0, 0x90, 0x90, 0x90, 0xF0, // this one is good, too go 0
             0x20, 0x60, 0x20, 0x20, 0x70, // 1
             0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
             0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
