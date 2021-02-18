@@ -112,7 +112,21 @@ impl Chip8 {
         self.dispatcher.table_f.insert(0x65, Chip8::op_fx65);
     }
 
-    pub fn load_rom(data: &[u8]) {}
+    pub fn set_key(&mut self, key: u8, is_set: bool){
+        if is_set == true {
+
+            self.keypad[key as usize] = 1;
+        } else {
+
+            self.keypad[key as usize] = 0;
+        }
+    }
+
+    pub fn load_rom(&mut self, data: &[u8]) {
+        for i in 0..data.len() {
+            self.mem[START_ADDR as usize + i] = data[i];
+        }
+    }
 
     pub fn cycle(&mut self) {
         //Fetch
@@ -435,6 +449,42 @@ impl Chip8 {
     }
     pub fn chip8_says_hello(&self) {
         println!("Chip 8 says hello");
+    }
+
+    pub fn print_registers(&self) {
+        println!("----REGISTERS----");
+        println!("CPU-Registers:\t\t{:x?}", self.reg);
+        println!("Index register:\t\t{:#x?}", self.i);
+        println!("Program counter:\t{:#x?}", self.pc);
+        println!("Delay timer:\t\t{:#x?}", self.delay);
+        println!("Sound timer:\t\t{:#x?}", self.sound);
+
+
+    }
+
+    pub fn print_stack(&self) {
+        println!("----STACK----");
+        println!("Stack pointer:\t\t{:#x?}", self.sp);
+        for i in 0..self.stack.len() {
+            if i == self.sp as usize {
+                print!("->");
+            }
+            println!("\t{:#x?}", self.stack[i]);
+        }
+    }
+
+    pub fn print_memory(&self) {
+        //print memory in 256 bytes blocks; first two blocks are fw blocks
+        println!("----MEMORY----");
+        for i in 0..self.mem.len(){
+            print!("0x{:02x} ", self.mem[i]);
+            if i % 16 == 15 {
+                print!("\n");
+            }
+            if i % 256 == 255 {
+                print!("\n");
+            }
+        }
     }
 }
 
