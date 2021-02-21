@@ -20,6 +20,14 @@ impl Platform {
         self.chip.print_memory();
     }
 
+    pub fn c8_cycle(&mut self) {
+        self.chip.cycle();
+    }
+
+    pub fn get_gfx(&mut self) -> [u8; 32*64] {
+        return self.chip.gfx;
+    }
+
     pub fn handle_input(&mut self, code: &str, is_pressed: bool) {
         if code == "1" {
             self.chip.set_key(0, is_pressed);

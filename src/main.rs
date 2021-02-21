@@ -10,6 +10,7 @@ use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 use piston::{Button, PressEvent, ReleaseEvent};
 use crate::platform::Platform;
+use std::process::exit;
 
 mod chip8;
 mod platform;
@@ -21,6 +22,10 @@ pub struct App {
     platform: Platform
 }
 
+const SCALE: f64 = 20.0;
+const VIDEO_WIDTH: f64 = 64.0;
+const VIDEO_HEIGHT: f64 = 32.0;
+
 impl App {
     fn render(&mut self, args: &RenderArgs) {
         use graphics::*;
@@ -28,28 +33,40 @@ impl App {
         const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
         const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 
-        let square = rectangle::square(0.0, 0.0, 50.0);
-        let rotation = self.rotation;
-        let (x, y) = (args.window_size[0] / 2.0, args.window_size[1] / 2.0);
+        const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
+        const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
+        const LINE_COLOR: [f32; 4] = [0.0, 0.0, 0.0, 0.0];
+
+        //See Grid
+        let grid = grid::Grid{
+            cols: 64,
+            rows: 32,
+            units: SCALE
+        };
+        let line = Line::new(LINE_COLOR, 0.5);
+        let platform = &mut self.platform;
+
 
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
-            clear(GREEN, gl);
+            clear(BLACK, gl);
 
-            let transform = c
-                .transform
-                .trans(x, y)
-                .rot_rad(rotation)
-                .trans(-25.0, -25.0);
-
+            grid.draw(&line, &c.draw_state, c.transform, gl);
             // Draw a box rotating around the middle of the screen.
-            rectangle(RED, square, transform, gl);
+            // rectangle(WHITE, square, transform, gl);
+            for (x,y) in grid.cells(){
+                let mut col = BLACK;
+                if platform.get_gfx()[(y as usize * VIDEO_WIDTH as usize) + x as usize] != 0 {
+                    col = WHITE;
+                }
+
+                rectangle(col, rectangle::square(x as f64* SCALE, y as f64 * SCALE, SCALE), c.transform, gl);
+            }
         });
     }
 
     fn update(&mut self, args: &UpdateArgs) {
-        // Rotate 2 radians per second.
-        self.rotation += 2.0 * args.dt;
+        self.platform.c8_cycle();
     }
 
     fn set_input(&mut self, btn: Button, is_pressed: bool){
@@ -65,22 +82,11 @@ impl App {
 
 fn main() {
 
-
-    println!("Hello, world!");
-
-    let c8 = chip8::new_chip8();
-    c8.chip8_says_hello();
-    c8.print_registers();
-    c8.print_stack();
-    c8.print_memory();
-
-    let mut platform = platform::new_platform();
-    platform.open_rom("test_opcode.ch8");
     // Change this to OpenGL::V2_1 if not working.
     let opengl = OpenGL::V3_2;
 
     // Create an Glutin window.
-    let mut window: Window = WindowSettings::new("spinning-square", [200, 200])
+    let mut window: Window = WindowSettings::new("spinning-square", [SCALE * VIDEO_WIDTH, SCALE * VIDEO_HEIGHT])
         .graphics_api(opengl)
         .exit_on_esc(true)
         .build()
@@ -92,6 +98,7 @@ fn main() {
         rotation: 0.0,
         platform: platform::new_platform()
     };
+    app.platform.open_rom("test_opcode.ch8");
 
     let mut settings = EventSettings::new();
     let mut events = Events::new(settings);

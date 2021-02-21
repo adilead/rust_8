@@ -7,6 +7,8 @@ const VIDEO_WIDTH: u32 = 64;
 const VIDEO_HEIGHT: u32 = 32;
 const FONTS_ADDR: u16 = 0x50;
 
+
+
 struct Dispatcher {
     main_table: HashMap<u16, fn(&mut Chip8)>,
     table_0: HashMap<u16, fn(&mut Chip8)>,
@@ -27,7 +29,7 @@ pub struct Chip8 {
     i: u16,
     //stores memory address for use in operations
     pc: u16,
-    //Prpgram counter
+    //Program counter
     stack: [u16; 16],
     //Stack
     sp: u8,
@@ -36,10 +38,11 @@ pub struct Chip8 {
     //delay timer;
     sound: u8,
     //sound timer; when the it's 0, a buzz shall be emitted
-    gfx: [u8; (VIDEO_HEIGHT * VIDEO_WIDTH) as usize],
+    pub gfx: [u8; (VIDEO_HEIGHT * VIDEO_WIDTH) as usize],
     keypad: [u8; 16],
     dispatcher: Dispatcher,//Monochrome display memory
 }
+
 
 impl Chip8 {
     pub fn init(&mut self) {
@@ -82,6 +85,7 @@ impl Chip8 {
         self.dispatcher.main_table.insert(0xd, Chip8::op_dxyn);
 
         self.dispatcher.main_table.insert(0x8, Chip8::table_8);
+        self.dispatcher.table_8.insert(0x0, Chip8::op_8xy0);
         self.dispatcher.table_8.insert(0x1, Chip8::op_8xy1);
         self.dispatcher.table_8.insert(0x2, Chip8::op_8xy2);
         self.dispatcher.table_8.insert(0x3, Chip8::op_8xy3);
@@ -130,7 +134,11 @@ impl Chip8 {
 
     pub fn cycle(&mut self) {
         //Fetch
-        self.opcode = ((self.mem[self.pc as usize] << 8) as u16 | (self.mem[(self.pc + 1) as usize]) as u16);
+
+        #![allow(arithmetic_overflow)]
+        self.opcode = ((self.mem[self.pc as usize] as u16) << 8) | self.mem[(self.pc + 1) as usize] as u16;
+        // self.opcode = self.mem[self.pc as usize] as u16;
+        // self.print_registers();
         //Increment PC
         self.pc += 2;
         //Execute
@@ -218,8 +226,8 @@ impl Chip8 {
     fn op_7xkk(&mut self) { //ADD Vx, byte
         let vx = (self.opcode & 0xf00) >> 8;
         let kk = (self.opcode & 0xff);
+        self.reg[vx as usize] = self.reg[vx as usize].wrapping_add(kk as u8);
 
-        self.reg[vx as usize] += kk as u8;
     }
 
     fn op_8xy0(&mut self) { //LD Vx, Vy. Set Vx = Vy
@@ -264,7 +272,7 @@ impl Chip8 {
         let vx = (self.opcode & 0xf00) >> 8;
         let vy = (self.opcode & 0xf0) >> 4;
 
-        let diff = self.reg[vx as usize] as u16 - self.reg[vy as usize] as u16;
+        let diff = (self.reg[vx as usize] as u16).wrapping_sub(self.reg[vy as usize] as u16);
 
         if self.reg[vx as usize] > self.reg[vy as usize] {
             self.reg[0xf] = 1;
@@ -453,6 +461,7 @@ impl Chip8 {
 
     pub fn print_registers(&self) {
         println!("----REGISTERS----");
+        println!("Opcode:\t\t{:#x?}", self.opcode);
         println!("CPU-Registers:\t\t{:x?}", self.reg);
         println!("Index register:\t\t{:#x?}", self.i);
         println!("Program counter:\t{:#x?}", self.pc);
@@ -482,6 +491,17 @@ impl Chip8 {
                 print!("\n");
             }
             if i % 256 == 255 {
+                print!("\n");
+                println!("-0x{:02x}", i+1);
+            }
+        }
+    }
+
+    pub fn print_gfx(&self) {
+        println!("-----GFX-----");
+        for i in 0..self.gfx.len(){
+            print!("0x{:02x} ", self.mem[i]);
+            if i % 64 == 63 {
                 print!("\n");
             }
         }
