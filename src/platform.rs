@@ -29,13 +29,13 @@ impl Platform {
     }
 
     pub fn handle_input(&mut self, code: &str, is_pressed: bool) {
-        if code == "1" {
+        if code == "D1" {
             self.chip.set_key(0, is_pressed);
-        } else if code == "2" {
+        } else if code == "D2" {
             self.chip.set_key(1, is_pressed);
-        } else if code == "3" {
+        } else if code == "D3" {
             self.chip.set_key(2, is_pressed);
-        } else if code == "4" {
+        } else if code == "D4" {
             self.chip.set_key(3, is_pressed);
         } else if code == "Q" {
             self.chip.set_key(4, is_pressed);

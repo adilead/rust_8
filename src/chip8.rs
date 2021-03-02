@@ -138,7 +138,6 @@ impl Chip8 {
         #![allow(arithmetic_overflow)]
         self.opcode = ((self.mem[self.pc as usize] as u16) << 8) | self.mem[(self.pc + 1) as usize] as u16;
         // self.opcode = self.mem[self.pc as usize] as u16;
-        // self.print_registers();
         //Increment PC
         self.pc += 2;
         //Execute
@@ -360,6 +359,11 @@ impl Chip8 {
             for col in 0..8 {
                 let sprite_pixel = sprite_byte & (0x80u8 >> col); //extracts the colth bit of the row byte
                 let screen_pixel: u32 = (y_pos + row as u32) as u32 * VIDEO_WIDTH + x_pos as u32 + col as u32;
+
+                //FIXME Ugly hack
+                if screen_pixel >= self.gfx.len() as u32{
+                    return;
+                }
 
                 if sprite_pixel != 0 {
 

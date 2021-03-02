@@ -73,6 +73,7 @@ impl App {
         match btn {
             Button::Keyboard(key) => {
                 let input_code = format!("{:?}", key);
+                println!("{}", input_code);
                 self.platform.handle_input(&input_code, is_pressed);
             },
             _ => println!("Something else")
@@ -98,7 +99,7 @@ fn main() {
         rotation: 0.0,
         platform: platform::new_platform()
     };
-    app.platform.open_rom("test_opcode.ch8");
+    app.platform.open_rom("games/Airplane.ch8");
 
     let mut settings = EventSettings::new();
     let mut events = Events::new(settings);
