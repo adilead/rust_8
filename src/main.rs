@@ -2,6 +2,7 @@ extern crate glutin_window;
 extern crate graphics;
 extern crate opengl_graphics;
 extern crate piston;
+extern crate clap;
 
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
@@ -10,7 +11,6 @@ use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 use piston::{Button, PressEvent, ReleaseEvent};
 use crate::platform::Platform;
-use std::process::exit;
 
 mod chip8;
 mod platform;
@@ -30,8 +30,6 @@ impl App {
     fn render(&mut self, args: &RenderArgs) {
         use graphics::*;
 
-        const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
-        const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
@@ -83,6 +81,10 @@ impl App {
 
 fn main() {
 
+    // let matches = clap::App::new("Rust_8")
+    //     .about("A chip8 emulator implemented in rust")
+    //     .arg(dbg!(clap::Arg::with_name("updates"))
+
     // Change this to OpenGL::V2_1 if not working.
     let opengl = OpenGL::V3_2;
 
@@ -107,11 +109,9 @@ fn main() {
 
         //Receive input
         if let Some(btn) = e.press_args() {
-            // println!("Pressed keyboard key '{:?}'", key);
             app.set_input(btn, true);
         };
         if let Some(btn) = e.release_args() {
-            // println!("Pressed keyboard key '{:?}'", key);
             app.set_input(btn, false);
         };
         //update chip8

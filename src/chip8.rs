@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::vec::Vec;
 use rand::Rng;
 
 const START_ADDR: u16 = 0x200;
@@ -224,7 +223,7 @@ impl Chip8 {
     }
     fn op_7xkk(&mut self) { //ADD Vx, byte
         let vx = (self.opcode & 0xf00) >> 8;
-        let kk = (self.opcode & 0xff);
+        let kk = self.opcode & 0xff;
         self.reg[vx as usize] = self.reg[vx as usize].wrapping_add(kk as u8);
 
     }
